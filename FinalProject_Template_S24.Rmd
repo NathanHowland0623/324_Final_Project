@@ -145,35 +145,41 @@ emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = Melbourne
 ```{r}
 # Data cleaning
 weather_cleaned_sydney <- weather %>%
-  dplyr::select(-WindGustDir, -WindDir9am, -WindDir3pm, everything()) %>%
+  dplyr::select(-c(WindGustDir, WindDir9am, WindDir3pm)) %>%
   na.omit() %>%
   filter(Location == "Sydney") %>%
-  dplyr::select(-Location, everything())
+  dplyr::select(-c(Location))
 weather_cleaned_melbourne <- weather %>%
-  dplyr::select(-WindGustDir, -WindDir9am, -WindDir3pm, everything()) %>%
+  dplyr::select(-c(WindGustDir, WindDir9am, WindDir3pm)) %>%
   na.omit() %>%
   filter(Location == "Melbourne") %>%
-  dplyr::select(-Location, everything())
-
-print(head(weather_cleaned_sydney, 10))
+  dplyr::select(-c(Location))
 
 # BIC plot Sydney
-#all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
-#plot(all_sydney, scale = "bic")
-#summary(all_sydney)
+all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
+plot(all_sydney, scale = "bic")
+summary(all_sydney)
 rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
+```
 
+<br>
+
+```{r}
 # Linearity odds plot Sydney
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney, ngroups = "all")
 
 #cor(weather_cleaned_sydney)
 
 # BIC plot Melbourne
-#all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
-#plot(all_melbourne, scale = "bic")
-#summary(all_melbourne)
+all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
+plot(all_melbourne, scale = "bic")
+summary(all_melbourne)
 rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
+```
 
+<br>
+
+```{r}
 # Linearity odds plot Melbourne
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne, ngroups = "all")
 
