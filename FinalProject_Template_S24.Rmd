@@ -19,6 +19,7 @@ library(emmeans)
 library(scales)
 library(leaps)
 library(dplyr)
+library(vcdExtra)
 
 
 knitr::opts_chunk$set(echo = F)
@@ -63,8 +64,9 @@ This experiment is using a data set of the weather patterns across various citie
 
 *Create a table here - it should include variable names and types*
 
-#  2. Detailed Exploratory Data Analysis (EDA)
 
+
+#  2. Detailed Exploratory Data Analysis (EDA)
 
 ### Question 1: Simple logistic regression model using RainToday as a predictor
 
@@ -158,7 +160,7 @@ weather_cleaned_melbourne <- weather %>%
 # BIC plot Sydney
 all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
 plot(all_sydney, scale = "bic")
-summary(all_sydney)
+summaryHH(all_sydney)
 rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
 ```
 
@@ -173,7 +175,7 @@ emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humi
 # BIC plot Melbourne
 all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
 plot(all_melbourne, scale = "bic")
-summary(all_melbourne)
+summaryHH(all_melbourne)
 rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
 ```
 
@@ -190,7 +192,6 @@ A BIC plot is made of both data from Sydney and data from Melbourne to derive th
 
 *Spend time investigating the data thoroughly and use this section to present figures that allow you to visualize the relationship of the response to different predictors.  Include descriptions of the figures that illustrate what you can learn from them.*
 
-
 # 3. Statistical Analysis 
 
 **Research Question 1**
@@ -202,20 +203,32 @@ A BIC plot is made of both data from Sydney and data from Melbourne to derive th
 
 ### Question 1: Simple logistic regression model using RainToday as a predictor
 
+```{r}
+# Brier scores
+print(paste("Brier score:", compute_brier(lr_model$RainTomorrow, predict(clean_weather))))
+```
+
 ### Question 2: Best model (using BIC) of all locations
 
+```{r}
+# Brier scores
+print(paste("Brier score:", compute_brier(myModel$RainTomorrow, predict(clean_weather))))
+```
+
 ### Question 3: Simple Logistic regression model dependent on the location
+
+```{r}
+# Brier scores
+print(paste("Brier score for Sydney:", compute_brier(SydneyWeather$RainTomorrow, predict(model_sydney))))
+print(paste("Brier score for Melbourne:", compute_brier(MelbourneWeather$RainTomorrow, predict(model_melbourne))))
+```
 
 ### Question 4: Best model (using BIC) of two locations
 
 ```{r}
 # Brier scores
-pred_prob <- predict(rain_tomorrow_sydney_model)
-brier_score <- mean((pred_prob - weather_cleaned_sydney$RainTomorrow)^2)
-print(paste("Brier score for Sydney:", brier_score))
-pred_prob <- predict(rain_tomorrow_melbourne_model)
-brier_score <- mean((pred_prob - weather_cleaned_melbourne$RainTomorrow)^2)
-print(paste("Brier score for Mebourne:", brier_score))
+print(paste("Brier score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, predict(rain_tomorrow_sydney_model))))
+print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model))))
 ```
 
 *You should not include your code. However, I would like to see the code for final models that you are using to answer the research question in the appendix.* 
