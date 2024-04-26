@@ -1,0 +1,90 @@
+---
+title: "324_FinalProject_Work"
+author: "Nathan Howland"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+# front-matter
+rm(list = ls()) # clear the workspace
+
+library(Stat2Data)
+library(tidyverse)
+library(mosaic)
+library(ggformula)
+library(emmeans)
+library(ggplot2)
+
+
+knitr::opts_chunk$set(echo = F)
+```
+
+```{r}
+weatherAUS <- read.csv("/Users/nathanhowland/Documents/324_Final_Project/weatherAUS.csv")
+
+head(weatherAUS)
+```
+
+Clean Data
+```{r}
+clean_weatherAUS <- weatherAUS %>%
+  select(RainToday, RainTomorrow) %>%
+  na.omit()
+```
+
+
+
+```{r}
+lr_model <- glm(factor(RainTomorrow) ~ factor(RainToday), family = binomial(link = "logit"), data = clean_weatherAUS)
+
+anova(lr_model)
+
+summary(lr_model)
+```
+
+
+EDA
+```{r}
+library(ggplot2)
+
+# Create a bar chart with proportions
+ggplot(clean_weatherAUS, aes(x = RainToday, fill = RainTomorrow)) +
+  geom_bar(position = "fill") +
+  ylab("Proportion") +
+  ggtitle("Proportion of Rain Tomorrow by Rain Today")
+
+library(vcd)
+
+# Create a mosaic plot
+mosaic(~ RainToday + RainTomorrow, data = clean_weatherAUS, shade = TRUE, legend = TRUE)
+
+
+```
+
+
+Briar Score
+```{r}
+prediction <- predict(lr_model, clean_weatherAUS, type = "response")
+
+BriarScore <- mean((prediction - clean_weatherAUS$RainTomorrow)^2)
+
+BriarScore
+```
+
+Forecasted Probability given it did / didn't rain today?
+```{r}
+prediction
+```
+
+
+
+Odds Ratio
+```{r}
+pi <- exp(-1.720027 + 1.576018) / (1 + exp(-1.720027 + 1.576018))
+
+odds <- pi / (1 - pi)
+
+odds
+```
+
+This signifies that the RainToday variable is decently good at predicting whether it will rain tomorrow, but it seems that there are other factors that will effect the weather tomorrow aside from RainToday.
