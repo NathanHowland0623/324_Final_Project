@@ -19,7 +19,7 @@ library(emmeans)
 library(scales)
 library(leaps)
 library(dplyr)
-library(vcdExtra)
+library(HH)
 
 
 knitr::opts_chunk$set(echo = F)
@@ -95,30 +95,30 @@ clean_weather2 <- clean_weather
 clean_weather2$Location <- factor(clean_weather2$Location)
 
 # adding indicators
-clean_weather$IndLoc <- ifelse(clean_weather$Location == "Sydney", 1, 0)
-clean_weather$IndWindGustDir <- ifelse(clean_weather$WindGustDir == "W", 1, 0)
-clean_weather$IndWindDir9am <- ifelse(clean_weather$WindDir9am == "W", 1, 0)
-clean_weather$IndWindDir3pm <- ifelse(clean_weather$WindDir3pm == "WNW", 1, 0)
+clean_weather2$IndLoc <- ifelse(clean_weather2$Location == "Sydney", 1, 0)
+clean_weather2$IndWindGustDir <- ifelse(clean_weather2$WindGustDir == "W", 1, 0)
+clean_weather2$IndWindDir9am <- ifelse(clean_weather2$WindDir9am == "W", 1, 0)
+clean_weather2$IndWindDir3pm <- ifelse(clean_weather2$WindDir3pm == "WNW", 1, 0)
 
 # performing stepwise and creating BIC
-none <- lm(RainTomorrow ~ 1, data = clean_weather)
-full_model <- lm(RainTomorrow ~ ., data = clean_weather)
+none <- lm(RainTomorrow ~ 1, data = clean_weather2)
+full_model <- lm(RainTomorrow ~ ., data = clean_weather2)
 
 #step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
 
-all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather, nbest = 1, really.big = TRUE)
+all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather2, nbest = 1, really.big = TRUE)
 plot(all, scale = "bic")
 
 summaryHH(all)
 
 # create model based on BIC
-myModel <- glm(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, family = "binomial", data = clean_weather)
+myModel <- glm(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, family = "binomial", data = clean_weather2)
 summary(myModel)
 
 # plot model
-emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, data = clean_weather, ngroups = "all")
+emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, data = clean_weather2, ngroups = "all")
 
-predicted <- predict(myModel, newdata = clean_weather, type = "response")
+predicted <- predict(myModel, newdata = clean_weather2, type = "response")
 ```
 
 ### Question 3: Simple Logistic regression model dependent on the location
@@ -205,30 +205,42 @@ A BIC plot is made of both data from Sydney and data from Melbourne to derive th
 
 ```{r}
 # Brier scores
-print(paste("Brier score:", compute_brier(lr_model$RainTomorrow, predict(clean_weather))))
+print(paste("Briar score:", compute_brier(clean_weather$RainTomorrow, predict(lr_model, clean_weather, type = "response"))))
+
+pi <- exp(-1.720027 + 1.576018) / (1 + exp(-1.720027 + 1.576018))
+odds <- pi / (1 - pi)
+print(paste("Odds:", odds))
 ```
 
 ### Question 2: Best model (using BIC) of all locations
 
 ```{r}
 # Brier scores
-print(paste("Brier score:", compute_brier(myModel$RainTomorrow, predict(clean_weather))))
+print(paste("Briar score:", compute_brier(clean_weather2$RainTomorrow, predict(myModel, clean_weather2, type = "response"))))
 ```
 
 ### Question 3: Simple Logistic regression model dependent on the location
 
 ```{r}
 # Brier scores
-print(paste("Brier score for Sydney:", compute_brier(SydneyWeather$RainTomorrow, predict(model_sydney))))
-print(paste("Brier score for Melbourne:", compute_brier(MelbourneWeather$RainTomorrow, predict(model_melbourne))))
+print(paste("Briar score for Sydney:", compute_brier(SydneyWeather$RainTomorrow, predict(model_sydney, SydneyWeather, type = "response"))))
+print(paste("Briar score for Melbourne:", compute_brier(MelbourneWeather$RainTomorrow, predict(model_melbourne, MelbourneWeather, type = "response"))))
+
+pi_sydney <- exp(-1.58290 + 1.62910) / (1 + exp(-1.58290 + 1.62910))
+odds_sydney <- pi_sydney / (1 - pi_sydney)
+print(paste("Odds for Sydney:", odds_sydney))
+
+pi_melbourne <- exp(-1.50550 + 1.02034) / (1 + exp(-1.50550 + 1.02034))
+odds_melbourne <- pi_melbourne / (1 - pi_melbourne)
+print(paste("Odds for Melbourne:", odds_melbourne))
 ```
 
 ### Question 4: Best model (using BIC) of two locations
 
 ```{r}
 # Brier scores
-print(paste("Brier score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, predict(rain_tomorrow_sydney_model))))
-print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model))))
+print(paste("Briar score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, predict(rain_tomorrow_sydney_model, weather_cleaned_sydney, type = "response"))))
+print(paste("Briar score for Melbourne:", compute_brier(weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model, weather_cleaned_melbourne, type = "response"))))
 ```
 
 *You should not include your code. However, I would like to see the code for final models that you are using to answer the research question in the appendix.* 
