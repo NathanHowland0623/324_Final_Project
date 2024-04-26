@@ -102,7 +102,7 @@ clean_weather$IndWindDir3pm <- ifelse(clean_weather$WindDir3pm == "WNW", 1, 0)
 none <- lm(RainTomorrow ~ 1, data = clean_weather)
 full_model <- lm(RainTomorrow ~ ., data = clean_weather)
 
-#step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
+# step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
 
 all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather, nbest = 1, really.big = TRUE)
 plot(all, scale = "bic")
@@ -156,9 +156,9 @@ weather_cleaned_melbourne <- weather %>%
   dplyr::select(-c(Location))
 
 # BIC plot Sydney
-all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
-plot(all_sydney, scale = "bic")
-summary(all_sydney)
+# all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
+# plot(all_sydney, scale = "bic")
+# summary(all_sydney)
 rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
 ```
 
@@ -168,12 +168,12 @@ rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + 
 # Linearity odds plot Sydney
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney, ngroups = "all")
 
-#cor(weather_cleaned_sydney)
+# cor(weather_cleaned_sydney)
 
 # BIC plot Melbourne
-all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
-plot(all_melbourne, scale = "bic")
-summary(all_melbourne)
+# all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
+# plot(all_melbourne, scale = "bic")
+# summary(all_melbourne)
 rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
 ```
 
@@ -183,7 +183,7 @@ rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine
 # Linearity odds plot Melbourne
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne, ngroups = "all")
 
-#cor(weather_cleaned_melbourne)
+# cor(weather_cleaned_melbourne)
 ```
 
 A BIC plot is made of both data from Sydney and data from Melbourne to derive the explanatory variables that maximize the BIC score, which we then use to create a simple logistic model. A linearity condition assesment using the logarithm of the odds is also employed.
