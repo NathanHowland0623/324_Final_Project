@@ -7,7 +7,7 @@ output:
 ---
 
   
-```{r, include = F, warning=F, message=F}
+```{r, include=F, warning=F, message=F}
 # front-matter
 rm(list = ls()) # clear the workspace
 
@@ -16,21 +16,17 @@ library(tidyverse)
 library(mosaic)
 library(ggformula)
 library(emmeans)
-library(ggplot2)
-library(vcd)
-library(GGally)
+library(scales)
 library(leaps)
-library(HH)
-library(car)
-library(htmltools)
+library(dplyr)
 
 
 knitr::opts_chunk$set(echo = F)
 ```
 
 ```{r, include = F}
-weather <- read.csv("/Users/nathanhowland/Documents/324_Final_Project/weatherAUS.csv", header = TRUE)
-# weather <- read.csv("/Users/tgr/Downloads/weatherAUS.csv", header = TRUE)
+# weather <- read.csv("/Users/nathanhowland/Documents/324_Final_Project/weatherAUS.csv", header = TRUE)
+weather <- read.csv("/Users/tgr/Downloads/weatherAUS.csv", header = TRUE)
 compute_brier <- function(actual, predicted) {
   mean((actual - predicted)^2)
 }
@@ -106,7 +102,7 @@ clean_weather$IndWindDir3pm <- ifelse(clean_weather$WindDir3pm == "WNW", 1, 0)
 none <- lm(RainTomorrow ~ 1, data = clean_weather)
 full_model <- lm(RainTomorrow ~ ., data = clean_weather)
 
-step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
+#step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
 
 all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather, nbest = 1, really.big = TRUE)
 plot(all, scale = "bic")
@@ -149,37 +145,39 @@ emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = Melbourne
 ```{r}
 # Data cleaning
 weather_cleaned_sydney <- weather %>%
-  select(Location, MinTemp, MaxTemp, Rainfall, Evaporation, Sunshine, WindGustSpeed, WindSpeed9am, WindSpeed3pm, Humidity9am, Humidity3pm, Pressure9am, Pressure3pm, Cloud9am, Cloud3pm, Temp9am, Temp3pm, RainToday, RainTomorrow) %>%
+  dplyr::select(-WindGustDir, -WindDir9am, -WindDir3pm, everything()) %>%
   na.omit() %>%
   filter(Location == "Sydney") %>%
-  select(MinTemp, MaxTemp, Rainfall, Evaporation, Sunshine, WindGustSpeed, WindSpeed9am, WindSpeed3pm, Humidity9am, Humidity3pm, Pressure9am, Pressure3pm, Cloud9am, Cloud3pm, Temp9am, Temp3pm, RainToday, RainTomorrow)
+  dplyr::select(-Location, everything())
 weather_cleaned_melbourne <- weather %>%
-  select(Location, MinTemp, MaxTemp, Rainfall, Evaporation, Sunshine, WindGustSpeed, WindSpeed9am, WindSpeed3pm, Humidity9am, Humidity3pm, Pressure9am, Pressure3pm, Cloud9am, Cloud3pm, Temp9am, Temp3pm, RainToday, RainTomorrow) %>%
+  dplyr::select(-WindGustDir, -WindDir9am, -WindDir3pm, everything()) %>%
   na.omit() %>%
   filter(Location == "Melbourne") %>%
-  select(MinTemp, MaxTemp, Rainfall, Evaporation, Sunshine, WindGustSpeed, WindSpeed9am, WindSpeed3pm, Humidity9am, Humidity3pm, Pressure9am, Pressure3pm, Cloud9am, Cloud3pm, Temp9am, Temp3pm, RainToday, RainTomorrow)
+  dplyr::select(-Location, everything())
+
+print(head(weather_cleaned_sydney, 10))
 
 # BIC plot Sydney
-all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
-plot(all_sydney, scale = "bic")
-summary(all_sydney)
+#all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
+#plot(all_sydney, scale = "bic")
+#summary(all_sydney)
 rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
 
 # Linearity odds plot Sydney
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney, ngroups = "all")
 
-cor(weather_cleaned_sydney)
+#cor(weather_cleaned_sydney)
 
 # BIC plot Melbourne
-all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
-plot(all_melbourne, scale = "bic")
-summary(all_melbourne)
+#all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
+#plot(all_melbourne, scale = "bic")
+#summary(all_melbourne)
 rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
 
 # Linearity odds plot Melbourne
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne, ngroups = "all")
 
-cor(weather_cleaned_melbourne)
+#cor(weather_cleaned_melbourne)
 ```
 
 A BIC plot is made of both data from Sydney and data from Melbourne to derive the explanatory variables that maximize the BIC score, which we then use to create a simple logistic model. A linearity condition assesment using the logarithm of the odds is also employed.
