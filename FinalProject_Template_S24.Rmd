@@ -54,7 +54,30 @@ This experiment is using a data set of the weather patterns across various citie
 
 *Create a table here - it should include variable names and types*
 
-| | 
+|    Variable   |    Type    | E/R |
+| ------------- | ---------- | --- |
+| Location      |Categorical |  E  |
+| MinTemp       |Quantitative|  E  |
+| MaxTemp       |Quantitative|  E  |
+| Rainfall      |Quantitative|  E  |
+| Evaporation   |Quantitative|  E  |
+| Sunshine      |Quantitative|  E  |
+| WindGustDir   |Categorical |  E  |
+| WindGustSpeed |Quantitative|  E  |
+| WindDir9am    |Categorical |  E  |
+| WindDir3pm    |Categorical |  E  |
+| WindSpeed9am  |Quantitative|  E  |
+| WindSpeed3pm  |Quantitative|  E  |
+| Humidity9am   |Quantitative|  E  |
+| Humidity3pm   |Quantitative|  E  |
+| Pressure9am   |Quantitative|  E  |
+| Pressure3pm   |Quantitative|  E  |
+| Cloud9am      |Categorical |  E  |
+| Cloud3pm      |Categorical |  E  |
+| Temp9am       |Quantitative|  E  |
+| Temp3pm       |Quantitative|  E  |
+| RainToday     |  Boolean   |  E  |
+| RainTomorrow  |  Boolean   |  R  |
 
 #  2. Detailed Exploratory Data Analysis (EDA)
 
