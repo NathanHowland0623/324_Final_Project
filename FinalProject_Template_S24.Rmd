@@ -55,7 +55,7 @@ This experiment is using a data set of the weather patterns across various citie
 *Create a table here - it should include variable names and types*
 
 |    Variable   |    Type    | E/R |
-| ------------- | ---------- | --- |
+|:-------------:|:----------:|:---:|
 | Location      |Categorical |  E  |
 | MinTemp       |Quantitative|  E  |
 | MaxTemp       |Quantitative|  E  |
