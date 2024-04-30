@@ -94,7 +94,11 @@ ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
   geom_bar(position = "fill") +
   ylab("Proportion") +
   ggtitle("Proportion of Rain Tomorrow by Rain Today")
+```
 
+<br>
+
+```{r}
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
 ```
 
@@ -125,18 +129,30 @@ full_model <- lm(RainTomorrow ~ ., data = clean_weather2)
 
 all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather2, nbest = 1, really.big = TRUE)
 plot(all, scale = "bic")
+```
 
+After performing a stepwise function for all variables, it was concluded from solely the BIC table that the most effective variables for predicting RainTomorrow was Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday.  Additionally, when creating the BIC table, some additional cleanup was performed where we created Indicator varaibles for some of the categorical variables such as IndLoc, IndWindGustDir, IndWindDir9am and IndWindDir3pm.  Using our BIC table we created a model using these variables, as seen below.
+
+```{r}
 summaryHH(all)
 
 # create model based on BIC
 myModel <- glm(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, family = "binomial", data = clean_weather2)
 summary(myModel)
+```
 
+As demonstrated from the following model, all variables prove to be significant predictors of RainTomorrow as all p-values are less than our significance level of 0.05.  Additionally, we have an AIC value of 38,540 which is the lowest value we could attain for predicting RainTomorrow.  For some context, when all other predictors are zero, the log odds of RainTomorrow is 74.50.  Additionally, for each unit increase in sunshine, the log odds of RainTomorrow decrease by 0.168.  This interpretation of variables also apply meaning that, for example, if it rained today (RainTodayTRUE), the log odds of RainTomorrow increase by 0.389 compared to when it didn't rain today.
+
+$\hat{\text{rainTomorrow}} = 74.4980470 + -0.1679587 * \text{Sunshine}  + 0.0508944 * \text{WindGustSpeed} - 0.0330498 * \text{WindSpeed3pm} + 0.0533006 * \text{Humidity3pm} - 0.0781103 * \text{Pressure3pm} + 0.3888131 * \text{RainTodayTRUE} $
+
+```{r}
 # plot model
 emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, data = clean_weather2, ngroups = "all")
 
 predicted <- predict(myModel, newdata = clean_weather2, type = "response")
 ```
+
+As a result of our predictive model, we created a empirical logit plot to verify whether the relationships between Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday and RainTomorrow align with our expectations to assess the overall goodness of fit of your logistic regression model.  Given the plot demonstrates data points that reasonably fall along the blue line, we can conclude that our model effectively demonstrates the  relationship between our predictors and the RainTomorrow.
 
 ### Question 3: Simple Logistic regression model dependent on the location
 
@@ -153,8 +169,6 @@ model_melbourne <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit
 summary(model_sydney)
 summary(model_melbourne)
 
-plot(model_sydney, which = 1)
-plot(model_melbourne, which = 1)
 emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = SydneyWeather, ngroups = "all")
 emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = MelbourneWeather, ngroups = "all")
 ```
@@ -238,6 +252,8 @@ print(paste("Odds Ratio:", odds_rainToday / odds_not_rainToday))
 print(paste("Brier score:", compute_brier(clean_weather2$RainTomorrow, predict(myModel, clean_weather2, type = "response"))))
 ```
 
+Given our brier score of 0.1066608 which indicates that, on average, the squared difference between the predicted probabilities of rain tomorrow and the actual outcomes is 0.1066608. Overall, our score of 0.1066608 indicates that our model is making accurate predictions of rain tomorrow, which is a positive indication of its performance.
+
 ### Question 3: Simple Logistic regression model dependent on the location
 
 ```{r}
@@ -312,8 +328,10 @@ prediction <- predict(lr_model, clean_weather, type = "response")
 BriarScore <- mean((prediction - clean_weather$RainTomorrow)^2)
 
 # Odds Ratio
-pi <- exp(-1.720027 + 1.576018) / (1 + exp(-1.720027 + 1.576018))
-odds <- pi / (1 - pi)
+pi_rainToday <- exp(-1.720027 + 1.576018) / (1 + exp(-1.720027 + 1.576018))
+odds_rainToday <- pi_rainToday / (1 - pi_rainToday)
+pi_not_rainToday <- exp(-1.720027) / (1 + exp(-1.720027))
+odds_not_rainToday <- pi_not_rainToday / (1 - pi_not_rainToday)
 ```
 
 Question 2 Code
