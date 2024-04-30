@@ -20,6 +20,7 @@ library(scales)
 library(leaps)
 library(dplyr)
 library(HH)
+library(vcdExtra)
 
 
 knitr::opts_chunk$set(echo = F)
@@ -72,7 +73,11 @@ ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
   ggtitle("Proportion of Rain Tomorrow by Rain Today")
 
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
+```
 
+<br>
+
+```{r}
 emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather, ngroups = "all")
 ```
 
@@ -258,7 +263,7 @@ print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourn
 
 Question 1 Code
 __________________________________________________________________________________________________________________________________________________
-```{r}
+```r
 # clean data
 clean_weather <- weather %>% na.omit()
 
@@ -272,7 +277,11 @@ ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
   ggtitle("Proportion of Rain Tomorrow by Rain Today")
 
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
+```
 
+<br>
+
+```r
 emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather, ngroups = "all")
 
 # Brier Score
@@ -286,7 +295,7 @@ odds <- pi / (1 - pi)
 
 Question 2 Code
 __________________________________________________________________________________________________________________________________________________
-```{r}
+```r
 # clean data
 clean_weather2 <- clean_weather
 clean_weather2$Location <- factor(clean_weather2$Location)
@@ -324,7 +333,7 @@ brier_score
 
 Question 3 Code
 __________________________________________________________________________________________________________________________________________________
-```{r}
+```r
 cleanWeather3 <- weather %>% na.omit()
 SydneyWeather <- cleanWeather3 %>% filter(Location == "Sydney")
 MelbourneWeather <- cleanWeather3 %>% filter(Location == "Melbourne")
