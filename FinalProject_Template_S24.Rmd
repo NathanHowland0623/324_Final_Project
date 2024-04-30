@@ -288,6 +288,26 @@ print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourn
 
 *You should not include your code. However, I would like to see the code for final models that you are using to answer the research question in the appendix.* 
 
+## Simple logistic regression model using RainToday as a predictor
+## Simple Logistic regression model dependent on the location
+
+The model assumptions we need to satisfy for these two models are:
+
+* Linearity: We cannot prove this assumption because a model using only one categorical boolean variable is not a line. This model essentially uses the number of datapoints having rain yesterday in order to determine a value for rain today.
+* Independence: The datapoints were obtained from a sensor whose results are not dependent on yesterday's results, so they are independent.
+* Randomness: The datapoints are always recorded from a sensor located in the same geographical location. For example, datapoints from the Sydney Airport are always recorded near the airport. That means that there is no randomness of recordings in the general area indicated by the datapoint. We cannot, therefore, generalize to the entire city.
+
+## What model should we use to predict rainfall across Australia?
+## Best model (using BIC) of two locations and the best model (using BIC) of all locations
+
+The model assumptions we need to satisfy for these two models are:
+
+* Linearity: We satisfied this requirement using an Empirical Logit plot, which tests linearity for categorical variables. The best model for all locations is somewhat convex, which could suggest this assumption is not true. The best model for two locations is completely linear, however.
+* Independence: The datapoints were obtained from a sensor whose results are not dependent on yesterday's results, so they are independent.
+* Randomness: The datapoints are always recorded from a sensor located in the same geographical location. For example, datapoints from the Sydney Airport are always recorded near the airport. That means that there is no randomness of recordings in the general area indicated by the datapoint. We cannot, therefore, generalize to the entire city.
+
+
+
 # 4. Conclusions 
 
 *Succinct response to each question laid out in 1.1.  This a much shorter version of section 3, and focuses on conclusions rather than the analyses.*
