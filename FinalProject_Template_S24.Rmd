@@ -27,7 +27,6 @@ knitr::opts_chunk$set(echo = F)
 ```
 
 ```{r, include = F}
-# weather <- read.csv("/Users/nathanhowland/Documents/324_Final_Project/weatherAUS.csv", header = TRUE)
 weather <- read.csv("./weatherAUS.csv", header = TRUE)
 compute_brier <- function(actual, predicted) {
   mean((actual - predicted)^2)
@@ -49,10 +48,6 @@ This experiment is using a data set of the weather patterns across various citie
 **Research Question 2:**  Should we use different models for different locations? Are there models that are better suited for different locations across Australia, and what variables are the best for these locations?
 
 ## 1.2 Variables
-
-*What is (are) possible explanatory and response variables?*
-
-*Create a table here - it should include variable names and types*
 
 |    Variable   |    Type    | E/R |
 |:-------------:|:----------:|:---:|
@@ -86,27 +81,23 @@ This experiment is using a data set of the weather patterns across various citie
 ```{r}
 # clean data
 clean_weather <- weather %>% na.omit()
-
 # model
 lr_model <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = clean_weather)
-
 ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
   geom_bar(position = "fill") +
   ylab("Proportion") +
   ggtitle("Proportion of Rain Tomorrow by Rain Today")
 ```
-
 <br>
-
 ```{r}
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
 ```
-
 <br>
-
 ```{r}
 emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather, ngroups = "all")
 ```
+
+For this initial analysis, we are going to use a cleaned dataset that only contains RainToday and RainTomorrow. Based on the plots above, we can see that there is a significant difference in the proportion of rain tomorrow based on whether it rained today.  The mosaic plot shows that the proportion of rain tomorrow is higher when it rained today compared to when it didn't. This initial analysis suggests that RainToday is a pretty solid predictor of RainTomorrow.
 
 ### Question 2: Best model (using BIC) of all locations
 
@@ -152,7 +143,7 @@ emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3
 predicted <- predict(myModel, newdata = clean_weather2, type = "response")
 ```
 
-As a result of our predictive model, we created a empirical logit plot to verify whether the relationships between Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday and RainTomorrow align with our expectations to assess the overall goodness of fit of your logistic regression model.  Given the plot demonstrates data points that reasonably fall along the blue line, we can conclude that our model effectively demonstrates the  relationship between our predictors and the RainTomorrow.
+As a result of our predictive model, we created an empirical logit plot to verify whether the relationships between Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday and RainTomorrow align with our expectations to assess the overall goodness of fit of your logistic regression model.  Given the plot demonstrates data points that reasonably fall along the blue line, we can conclude that our model effectively demonstrates the relationship between our predictors and the RainTomorrow.
 
 ### Question 3: Simple Logistic regression model dependent on the location
 
@@ -221,20 +212,31 @@ emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humi
 
 A BIC plot is made of both data from Sydney and data from Melbourne to derive the explanatory variables that maximize the BIC score, which we then use to create a simple logistic model. A linearity condition assesment using the logarithm of the odds is also employed.
 
-*Spend time investigating the data thoroughly and use this section to present figures that allow you to visualize the relationship of the response to different predictors.  Include descriptions of the figures that illustrate what you can learn from them.*
-
 # 3. Statistical Analysis 
+
+## Simple logistic regression model using RainToday as a predictor
+## Simple Logistic regression model dependent on the location
+
+The model assumptions we need to satisfy for these two models are:
+
+* Linearity: We cannot prove this assumption because a model using only one categorical boolean variable is not a line. This model essentially uses the number of datapoints having rain yesterday in order to determine a value for rain today.
+* Independence: The datapoints were obtained from a sensor whose results are not dependent on yesterday's results, so they are independent.
+* Randomness: The datapoints are always recorded from a sensor located in the same geographical location. For example, datapoints from the Sydney Airport are always recorded near the airport. That means that there is no randomness of recordings in the general area indicated by the datapoint. We cannot, therefore, generalize to the entire city.
+
+## Best model (using BIC) of all locations
+## Best model (using BIC) of two locations and the best model (using BIC) of all locations
+
+The model assumptions we need to satisfy for these two models are:
+
+* Linearity: We satisfied this requirement using an Empirical Logit plot, which tests linearity for categorical variables. The best model for all locations is somewhat convex, which could suggest this assumption is not true. The best model for two locations is completely linear, however.
+* Independence: The datapoints were obtained from a sensor whose results are not dependent on yesterday's results, so they are independent.
+* Randomness: The datapoints are always recorded from a sensor located in the same geographical location. For example, datapoints from the Sydney Airport are always recorded near the airport. That means that there is no randomness of recordings in the general area indicated by the datapoint. We cannot, therefore, generalize to the entire city.
 
 **Research Question 1**
 
-*Describe the statistical analysis that you used to answer both research questions. Each analysis should be labeled for the appropriate research question. This section should summarize all relevant analyses that lead to your final conclusions/decisions/recommendations. Be sure to include:*
-
-- *Model Assumptions & how checked/verified*
-- *Interpretation of relevant estimates/statistics/p-values IN CONTEXT*
-
 ### Question 1: Simple logistic regression model using RainToday as a predictor
 
-```{r}
+```{r, include = F}
 # Brier scores
 print(paste("Brier score:", compute_brier(clean_weather$RainTomorrow, predict(lr_model, clean_weather, type = "response"))))
 
@@ -245,18 +247,23 @@ odds_not_rainToday <- pi_not_rainToday / (1 - pi_not_rainToday)
 print(paste("Odds Ratio:", odds_rainToday / odds_not_rainToday))
 ```
 
+After the statistical analysis of this simple logistic regression model, we found that it is fairly sufficient at predicting RainTomorrow. This model obtained a Brier score of 0.165, which is a relatively low score, which shows that the model is making fairly accurate predictions of rain tomorrow. The odds ratio of 4.84 indicates that the odds of rain tomorrow are 4.84 times higher when it rained today compared to when it didn't rain today.
+
+
 ### Question 2: Best model (using BIC) of all locations
 
-```{r}
+```{r, include = F}
 # Brier scores
 print(paste("Brier score:", compute_brier(clean_weather2$RainTomorrow, predict(myModel, clean_weather2, type = "response"))))
 ```
 
-Given our brier score of 0.1066608 which indicates that, on average, the squared difference between the predicted probabilities of rain tomorrow and the actual outcomes is 0.1066608. Overall, our score of 0.1066608 indicates that our model is making accurate predictions of rain tomorrow, which is a positive indication of its performance.
+Given our brier score of 0.1066608 which indicates that, on average, the squared difference between the predicted probabilities of rain tomorrow and the actual outcomes is 0.1066608. Overall, our score of 0.1066608 indicates that our model is making accurate predictions of rain tomorrow, which displays a greater accuracy than the simple logistic regression model from question 1.
+
+**Research Question 2**
 
 ### Question 3: Simple Logistic regression model dependent on the location
 
-```{r}
+```{r, include = F}
 # Brier scores
 print(paste("Brier score for Sydney:", compute_brier(SydneyWeather$RainTomorrow, predict(model_sydney, SydneyWeather, type = "response"))))
 print(paste("Brier score for Melbourne:", compute_brier(MelbourneWeather$RainTomorrow, predict(model_melbourne, MelbourneWeather, type = "response"))))
@@ -278,45 +285,24 @@ odds_melbourne_not_rainToday <- pi_melbourne_not_rainToday / (1 - pi_melbourne_n
 print(paste("Odds Ratio for Melbourne:", odds_melbourne_rainToday / odds_melbourne_not_rainToday))
 ```
 
+In the basic forecast model where we solely used RainToday to predict RainTomorrow, we calculated the brier score and odds ratio for both Sydney and Melbourne. The brier scores for both Sydney and Melbourne are very similar with values of 0.165 and 0.179 respectively. Once we create a model with more explanatory variables such as Sunshine, MinTemp, MaxTemp, WindGustSpeed, Humidity3pm, and RainToday, we get much lower Brier Scores for both Sydney and Melbourne with values of 0.118 and 0.137, which indicates that this model has greater accuracy in predicting RainTomorrow.
+
 ### Question 4: Best model (using BIC) of two locations
 
-```{r}
+```{r, include = F}
 # Brier scores
 print(paste("Brier score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, predict(rain_tomorrow_sydney_model, weather_cleaned_sydney, type = "response"))))
 print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model, weather_cleaned_melbourne, type = "response"))))
 ```
 
-*You should not include your code. However, I would like to see the code for final models that you are using to answer the research question in the appendix.* 
-
-## Simple logistic regression model using RainToday as a predictor
-## Simple Logistic regression model dependent on the location
-
-The model assumptions we need to satisfy for these two models are:
-
-* Linearity: We cannot prove this assumption because a model using only one categorical boolean variable is not a line. This model essentially uses the number of datapoints having rain yesterday in order to determine a value for rain today.
-* Independence: The datapoints were obtained from a sensor whose results are not dependent on yesterday's results, so they are independent.
-* Randomness: The datapoints are always recorded from a sensor located in the same geographical location. For example, datapoints from the Sydney Airport are always recorded near the airport. That means that there is no randomness of recordings in the general area indicated by the datapoint. We cannot, therefore, generalize to the entire city.
-
-## What model should we use to predict rainfall across Australia?
-## Best model (using BIC) of two locations and the best model (using BIC) of all locations
-
-The model assumptions we need to satisfy for these two models are:
-
-* Linearity: We satisfied this requirement using an Empirical Logit plot, which tests linearity for categorical variables. The best model for all locations is somewhat convex, which could suggest this assumption is not true. The best model for two locations is completely linear, however.
-* Independence: The datapoints were obtained from a sensor whose results are not dependent on yesterday's results, so they are independent.
-* Randomness: The datapoints are always recorded from a sensor located in the same geographical location. For example, datapoints from the Sydney Airport are always recorded near the airport. That means that there is no randomness of recordings in the general area indicated by the datapoint. We cannot, therefore, generalize to the entire city.
-
-
+### Need Evaluation of Question 4 Results ###
 
 # 4. Conclusions 
 
-*Succinct response to each question laid out in 1.1.  This a much shorter version of section 3, and focuses on conclusions rather than the analyses.*
-
-**Research Question 1:**  
+**Research Question 1:**  Based on the results of our analysis, and a Brier score of 0.107, we can conclude that the best model for predicting rainfall across Australia is the model that includes the variables Sunshine, WindGustSpeed, WindSpeed3pm, Humidity3pm, Pressure3pm, and RainToday. However, we can also conclude that the simple logistic regression model using RainToday as a predictor is also a reliable model for predicting rainfall across Australia, especially when without access to the extra variables used in the best model.
 
 **Research Question 2:**  
 
-*(all research questions in 1.1 should be addressed, in the same order)*
 
 # 5. Appendix 
 
