@@ -21,8 +21,6 @@ library(leaps)
 library(dplyr)
 library(HH)
 library(vcdExtra)
-
-
 knitr::opts_chunk$set(echo = F)
 ```
 
@@ -78,25 +76,22 @@ This experiment is using a data set of the weather patterns across various citie
 
 ### Question 1: Simple logistic regression model using RainToday as a predictor
 
-```{r}
+```{r, warning = F, fig.width = 3, fig.height = 3}
 # clean data
 clean_weather <- weather %>% na.omit()
+
 # model
 lr_model <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = clean_weather)
+
 ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
   geom_bar(position = "fill") +
   ylab("Proportion") +
-  ggtitle("Proportion of Rain Tomorrow by Rain Today")
+  ggtitle("Proportion of RainTomorrow by RainToday") +
+  theme(plot.title = element_text(size=8), axis.title = element_text(size = 9), legend.title = element_text(size = 9))
 ```
-<br>
-```{r}
+```{r, fig.width = 3.5, fig.height = 3.5}
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
 ```
-<br>
-```{r}
-emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather, ngroups = "all")
-```
-
 For this initial analysis, we are going to use a cleaned dataset that only contains RainToday and RainTomorrow. Based on the plots above, we can see that there is a significant difference in the proportion of rain tomorrow based on whether it rained today.  The mosaic plot shows that the proportion of rain tomorrow is higher when it rained today compared to when it didn't. This initial analysis suggests that RainToday is a pretty solid predictor of RainTomorrow.
 
 ### Question 2: Best model (using BIC) of all locations
@@ -117,26 +112,29 @@ none <- lm(RainTomorrow ~ 1, data = clean_weather2)
 full_model <- lm(RainTomorrow ~ ., data = clean_weather2)
 
 # step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
+```
 
+```{r, fig.height = 4.5, fig.width = 6}
 all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather2, nbest = 1, really.big = TRUE)
 plot(all, scale = "bic")
 ```
 
 After performing a stepwise function for all variables, it was concluded from solely the BIC table that the most effective variables for predicting RainTomorrow was Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday.  Additionally, when creating the BIC table, some additional cleanup was performed where we created Indicator varaibles for some of the categorical variables such as IndLoc, IndWindGustDir, IndWindDir9am and IndWindDir3pm.  Using our BIC table we created a model using these variables, as seen below.
 
-```{r}
-summaryHH(all)
+```{r, include = F}
+#summaryHH(all)
 
 # create model based on BIC
 myModel <- glm(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, family = "binomial", data = clean_weather2)
-summary(myModel)
+#summary(myModel)
 ```
 
 As demonstrated from the following model, all variables prove to be significant predictors of RainTomorrow as all p-values are less than our significance level of 0.05.  Additionally, we have an AIC value of 38,540 which is the lowest value we could attain for predicting RainTomorrow.  For some context, when all other predictors are zero, the log odds of RainTomorrow is 74.50.  Additionally, for each unit increase in sunshine, the log odds of RainTomorrow decrease by 0.168.  This interpretation of variables also apply meaning that, for example, if it rained today (RainTodayTRUE), the log odds of RainTomorrow increase by 0.389 compared to when it didn't rain today.
 
-$\hat{\text{rainTomorrow}} = 74.4980470 + -0.1679587 * \text{Sunshine}  + 0.0508944 * \text{WindGustSpeed} - 0.0330498 * \text{WindSpeed3pm} + 0.0533006 * \text{Humidity3pm} - 0.0781103 * \text{Pressure3pm} + 0.3888131 * \text{RainTodayTRUE} $
+\[\hat{\text{RainTomorrow}} = 74.4980470 + -0.1679587 * \text{Sunshine}  + 0.0508944 * \text{WindGustSpeed} - 0.0330498 *\]
+\[\text{WindSpeed3pm} + 0.0533006 * \text{Humidity3pm} - 0.0781103 * \text{Pressure3pm} + 0.3888131 * \text{RainTodayTRUE}\]
 
-```{r}
+```{r, fig.height = 4, fig.width = 6}
 # plot model
 emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, data = clean_weather2, ngroups = "all")
 
@@ -147,7 +145,7 @@ As a result of our predictive model, we created an empirical logit plot to verif
 
 ### Question 3: Simple Logistic regression model dependent on the location
 
-```{r}
+```{r, fig.width = 3, fig.height = 3}
 cleanWeather3 <- weather %>% na.omit()
 SydneyWeather <- cleanWeather3 %>% filter(Location == "Sydney")
 MelbourneWeather <- cleanWeather3 %>% filter(Location == "Melbourne")
@@ -157,16 +155,18 @@ gf_bar(~ RainToday | Location, data = MelbourneWeather, fill = ~RainTomorrow, po
 
 model_sydney <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = SydneyWeather)
 model_melbourne <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = MelbourneWeather)
-summary(model_sydney)
-summary(model_melbourne)
+# summary(model_sydney)
+# summary(model_melbourne)
 
-emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = SydneyWeather, ngroups = "all")
-emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = MelbourneWeather, ngroups = "all")
+# emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = SydneyWeather, ngroups = "all")
+# emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = MelbourneWeather, ngroups = "all")
 ```
+
+The patterns observed in the box plots above show that there is no outstanding initial patterns to be detected between the two locations. This suggests the need for further investigation / analysis of the dataset to determine if there is a model that is bette suited for different locations.
 
 ### Question 4: Best model (using BIC) of two locations
 
-```{r}
+```{r, fig.width = 6, fig.height = 4.5}
 # Data cleaning
 weather_cleaned_sydney <- weather %>%
   dplyr::select(-c(WindGustDir, WindDir9am, WindDir3pm)) %>%
@@ -182,28 +182,30 @@ weather_cleaned_melbourne <- weather %>%
 # BIC plot Sydney
 all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
 plot(all_sydney, scale = "bic")
-summaryHH(all_sydney)
+# summaryHH(all_sydney)
 rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
 ```
 
 <br>
 
-```{r}
+```{r, fig.height = 4, fig.width = 6}
 # Linearity odds plot Sydney
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney, ngroups = "all")
+```
 
+```{r, fig.width = 6, fig.height = 4.5}
 # cor(weather_cleaned_sydney)
 
 # BIC plot Melbourne
 all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
 plot(all_melbourne, scale = "bic")
-summaryHH(all_melbourne)
+# summaryHH(all_melbourne)
 rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
 ```
 
 <br>
 
-```{r}
+```{r, fig.height = 4, fig.width = 6}
 # Linearity odds plot Melbourne
 emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne, ngroups = "all")
 
@@ -299,10 +301,27 @@ print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourn
 
 # 4. Conclusions 
 
+```{r, include = F}
+# Brier scores for Sydney and Melbourne
+scores_sydney <- c(0.165, 0.118)
+scores_melbourne <- c(0.179, 0.137)
+
+# Differences between scores for the two models
+differences <- scores_sydney - scores_melbourne
+
+# Paired t-test
+t_test_result <- t.test(scores_sydney, scores_melbourne, paired = TRUE)
+
+# Output results
+cat("t-statistic:", t_test_result$statistic, "\n")
+cat("p-value:", t_test_result$p.value, "\n")
+cat("Mean Difference:", mean(differences), "\n")
+cat("Standard Deviation of Differences:", sd(differences), "\n")
+```
+
 **Research Question 1:**  Based on the results of our analysis, and a Brier score of 0.107, we can conclude that the best model for predicting rainfall across Australia is the model that includes the variables Sunshine, WindGustSpeed, WindSpeed3pm, Humidity3pm, Pressure3pm, and RainToday. However, we can also conclude that the simple logistic regression model using RainToday as a predictor is also a reliable model for predicting rainfall across Australia, especially when without access to the extra variables used in the best model.
 
-**Research Question 2:**  
-
+**Research Question 2:**  From the results of this experiment, we obtained Brier Scores for the simple logistic regression and the best BIC models for both Sydney and Melbourne (0.165 vs. 0.179, 0.118 vs 0.137). Running a paired t-test on these Brier scores, we obtained a p-value of 0.096, which concludes there is not enough evidence that there is no significanct difference between the Brier scores of the different locations. Therefore, we can conclude that a model used for predicting rainfall in Sydney would yield similar results to a model used for predicting rainfall in Melbourne.
 
 # 5. Appendix 
 
@@ -322,11 +341,7 @@ ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
   ggtitle("Proportion of Rain Tomorrow by Rain Today")
 
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
-```
 
-<br>
-
-```r
 emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather, ngroups = "all")
 
 # Brier Score
@@ -424,6 +439,41 @@ odds_melbourne
 
 Question 4 Code
 __________________________________________________________________________________________________________________________________________________
+```r
+# Data cleaning
+weather_cleaned_sydney <- weather %>%
+  dplyr::select(-c(WindGustDir, WindDir9am, WindDir3pm)) %>%
+  na.omit() %>%
+  filter(Location == "Sydney") %>%
+  dplyr::select(-c(Location))
+weather_cleaned_melbourne <- weather %>%
+  dplyr::select(-c(WindGustDir, WindDir9am, WindDir3pm)) %>%
+  na.omit() %>%
+  filter(Location == "Melbourne") %>%
+  dplyr::select(-c(Location))
 
+# BIC plot Sydney
+all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
+plot(all_sydney, scale = "bic")
+summaryHH(all_sydney)
+rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
+# Linearity odds plot Sydney
+emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney, ngroups = "all")
 
-*This section should include the code for the linear models used to answer the research questions, as well as code for any comparisons you are making. *
+# cor(weather_cleaned_sydney)
+
+# BIC plot Melbourne
+all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
+plot(all_melbourne, scale = "bic")
+summaryHH(all_melbourne)
+rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
+
+# Linearity odds plot Melbourne
+emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne, ngroups = "all")
+
+# cor(weather_cleaned_melbourne)
+
+# Brier scores
+print(paste("Brier score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, predict(rain_tomorrow_sydney_model, weather_cleaned_sydney, type = "response"))))
+print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model, weather_cleaned_melbourne, type = "response"))))
+```
