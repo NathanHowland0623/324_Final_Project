@@ -332,7 +332,8 @@ ________________________________________________________________________________
 clean_weather <- weather %>% na.omit()
 
 # model
-lr_model <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = clean_weather)
+lr_model <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data 
+  = clean_weather)
 
 # eda
 ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
@@ -342,7 +343,8 @@ ggplot(clean_weather, aes(x = RainToday, fill = RainTomorrow)) +
 
 mosaic(~ RainToday + RainTomorrow, data = clean_weather, shade = TRUE, legend = TRUE)
 
-emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather, ngroups = "all")
+emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = clean_weather,
+  ngroups = "all")
 
 # Brier Score
 prediction <- predict(lr_model, clean_weather, type = "response")
@@ -374,17 +376,20 @@ full_model <- lm(RainTomorrow ~ ., data = clean_weather)
 
 step(none, scope = list(upper = full_model), direction = "forward", really.big = T)
 
-all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, data = clean_weather, nbest = 1, really.big = TRUE)
+all <- regsubsets(RainTomorrow ~ . - Location - WindGustDir - WindDir9am - WindDir3pm, 
+  data = clean_weather, nbest = 1, really.big = TRUE)
 plot(all, scale = "bic")
 
 summaryHH(all)
 
 # create model based on BIC
-myModel <- glm(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, family = "binomial", data = clean_weather)
+myModel <- glm(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + 
+  Pressure3pm + RainToday, family = "binomial", data = clean_weather)
 summary(myModel)
 
 # plot model
-emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + Pressure3pm + RainToday, data = clean_weather, ngroups = "all")
+emplogitplot1(RainTomorrow ~ Sunshine + WindGustSpeed + WindSpeed3pm + Humidity3pm + 
+  Pressure3pm + RainToday, data = clean_weather, ngroups = "all")
 
 predicted <- predict(myModel, newdata = clean_weather, type = "response")
 
@@ -400,31 +405,39 @@ cleanWeather3 <- weather %>% na.omit()
 SydneyWeather <- cleanWeather3 %>% filter(Location == "Sydney")
 MelbourneWeather <- cleanWeather3 %>% filter(Location == "Melbourne")
 
-gf_bar(~ RainToday | Location, data = SydneyWeather, fill = ~RainTomorrow, position = position_dodge())
-gf_bar(~ RainToday | Location, data = MelbourneWeather, fill = ~RainTomorrow, position = position_dodge())
+gf_bar(~ RainToday | Location, data = SydneyWeather, fill = ~RainTomorrow, position = 
+  position_dodge())
+gf_bar(~ RainToday | Location, data = MelbourneWeather, fill = ~RainTomorrow, position = 
+  position_dodge())
 
-model_sydney <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = SydneyWeather)
-model_melbourne <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = MelbourneWeather)
+model_sydney <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data = 
+  SydneyWeather)
+model_melbourne <- glm(RainTomorrow ~ RainToday, family = binomial(link = "logit"), data 
+  = MelbourneWeather)
 summary(model_sydney)
 summary(model_melbourne)
 
 plot(model_sydney, which = 1)
 plot(model_melbourne, which = 1)
-emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = SydneyWeather, ngroups = "all")
-emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = MelbourneWeather, ngroups = "all")
+emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = SydneyWeather, 
+  ngroups = "all")
+emplogitplot1(as.numeric(RainTomorrow) ~ as.numeric(RainToday), data = MelbourneWeather, 
+  ngroups = "all")
 
 # Make predictions for Sydney
 predictions_sydney <- predict(model_sydney, newdata = SydneyWeather, type = "response")
 
 # Make predictions for Melbourne
-predictions_melbourne <- predict(model_melbourne, newdata = MelbourneWeather, type = "response")
+predictions_melbourne <- predict(model_melbourne, newdata = MelbourneWeather, type = 
+  "response")
 
 # Compute Brier scores for Sydney
 brier_score_sydney <- compute_brier(SydneyWeather$RainTomorrow, predictions_sydney)
 brier_score_sydney
 
 # Compute Brier scores for Melbourne
-brier_score_melbourne <- compute_brier(MelbourneWeather$RainTomorrow, predictions_melbourne)
+brier_score_melbourne <- compute_brier(MelbourneWeather$RainTomorrow, 
+  predictions_melbourne)
 brier_score_melbourne
 
 # Calculate odds ratios
@@ -453,27 +466,36 @@ weather_cleaned_melbourne <- weather %>%
   dplyr::select(-c(Location))
 
 # BIC plot Sydney
-all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = "exhaustive")
+all_sydney <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_sydney, method = 
+  "exhaustive")
 plot(all_sydney, scale = "bic")
 summaryHH(all_sydney)
-rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
+rain_tomorrow_sydney_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + 
+  WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney)
 # Linearity odds plot Sydney
-emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_sydney, ngroups = "all")
+emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + 
+  RainToday, data = weather_cleaned_sydney, ngroups = "all")
 
 # cor(weather_cleaned_sydney)
 
 # BIC plot Melbourne
-all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = "exhaustive")
+all_melbourne <- regsubsets(RainTomorrow ~ ., data = weather_cleaned_melbourne, method = 
+  "exhaustive")
 plot(all_melbourne, scale = "bic")
 summaryHH(all_melbourne)
-rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
+rain_tomorrow_melbourne_model <- glm(RainTomorrow ~ MinTemp + MaxTemp + Sunshine + 
+  WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne)
 
 # Linearity odds plot Melbourne
-emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + RainToday, data = weather_cleaned_melbourne, ngroups = "all")
+emplogitplot1(RainTomorrow ~ Sunshine + MinTemp + MaxTemp + WindGustSpeed + Humidity3pm + 
+  RainToday, data = weather_cleaned_melbourne, ngroups = "all")
 
 # cor(weather_cleaned_melbourne)
 
 # Brier scores
-print(paste("Brier score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, predict(rain_tomorrow_sydney_model, weather_cleaned_sydney, type = "response"))))
-print(paste("Brier score for Melbourne:", compute_brier(weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model, weather_cleaned_melbourne, type = "response"))))
+print(paste("Brier score for Sydney:", compute_brier(weather_cleaned_sydney$RainTomorrow, 
+  predict(rain_tomorrow_sydney_model, weather_cleaned_sydney, type = "response"))))
+print(paste("Brier score for Melbourne:", compute_brier( 
+    weather_cleaned_melbourne$RainTomorrow, predict(rain_tomorrow_melbourne_model, 
+    weather_cleaned_melbourne, type = "response"))))
 ```
